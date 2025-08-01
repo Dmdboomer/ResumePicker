@@ -11,8 +11,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.io.File
 
+
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.TransformedText
+
 private val CONFIG_FILE = File("user_config.json")
 
+class MaskedApiKeyTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val maskedText = buildAnnotatedString {
+            if (text.isNotEmpty()) {
+                append(text.take(2)) // Show first 2 chars
+                repeat(text.length - 2) { append('•') } // Mask remaining chars
+            } else {
+                append(text)
+            }
+        }
+
+        return TransformedText(
+            text = maskedText,
+            offsetMapping = object : OffsetMapping {
+                // 1:1 mapping between original and masked positions
+                override fun originalToTransformed(offset: Int): Int =
+                    if (offset <= maskedText.length) offset else maskedText.length
+
+                override fun transformedToOriginal(offset: Int): Int =
+                    if (offset <= text.length) offset else text.length
+            }
+        )
+    }
+}
 
 @Composable
 fun ConfigPage(onComplete: () -> Unit) {
@@ -26,6 +66,10 @@ fun ConfigPage(onComplete: () -> Unit) {
     var name by remember { mutableStateOf(name ) }
     var email by remember { mutableStateOf(email ) }
     var phone by remember { mutableStateOf(phone) }
+    var geminiThingXd by remember { mutableStateOf(geminiThingXd) }
+
+    var isFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     Scaffold(
     ) { padding ->
@@ -66,10 +110,17 @@ fun ConfigPage(onComplete: () -> Unit) {
             Spacer(Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = geminiThingXd.substring(0,3)+ "...",
+                value = geminiThingXd,
                 onValueChange = { geminiThingXd = it },
                 label = { Text("A+P^I!K_E-Y") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        isFocused = focusState.isFocused
+                    },
+                visualTransformation = if (isFocused) PasswordVisualTransformation() else MaskedApiKeyTransformation(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
             )
 
             Spacer(Modifier.height(24.dp))

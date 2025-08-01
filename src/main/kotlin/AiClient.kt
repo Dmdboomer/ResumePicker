@@ -1,3 +1,8 @@
+import Config.email
+import Config.geminiThingXd
+import Config.name
+import Config.parseConfig
+import Config.phone
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -7,13 +12,22 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+private val CONFIG_FILE = File("user_config.json")
+
 
 object AiClient {
     private const val GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-    private val dotenv = dotenv()
-    private val GEMINI_API_KEY = dotenv["GEMINI_API_KEY"] ?: error("GEMINI_API_KEY missing in .env file")
+    val json = CONFIG_FILE.readText()
+    val config = parseConfig(json).also {
+        name = it.name
+        email = it.email
+        phone = it.phone
+        geminiThingXd = it.geminiThingXd
+    }
+    private val GEMINI_API_KEY = geminiThingXd
     private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -116,7 +130,7 @@ object AiClient {
         }
     }
 
-    fun generateHaiku(): String {
+    fun generateHaiku(): String { //Test api key
         val prompt = """
         Write me a beautiful haiku about nature.
         Follow the traditional 5-7-5 syllable structure.

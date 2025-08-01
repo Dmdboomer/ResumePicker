@@ -8,7 +8,7 @@ private val encoder = Base64.getEncoder()
 private val decoder = Base64.getDecoder()
 private val CONFIG_FILE = File("user_config.json")
 
-// Dummy security to dodge scanning, etc. XD
+// Dummy security to dodge scanning, etc. 1% better than plaintext XD
 private const val GOOFY_AHH_NAME = "9d82y30fyP48y3Wk9uf2I08e32Tr8fh3" // 16/24/32
 private const val DA_SECOND_NAME = "3Sh01Oq3Ka42r2tF" // 16
 
@@ -97,6 +97,7 @@ object Config {
           "name": "$encryptedName",
           "email": "$encryptedEmail",
           "phone": "$encryptedPhone"
+          "geminiThingXd": "$encryptedGeminiThingXd"
         }
         """.trimIndent()
 
@@ -110,7 +111,7 @@ object Config {
             ?: throw IllegalStateException("Invalid config format")
         val phone = "\"phone\":\\s*\"([^\"]+)\"".toRegex().find(json)?.groupValues?.get(1)
             ?: throw IllegalStateException("Invalid config format")
-        val geminiThingXd = "\"phone\":\\s*\"([^\"]+)\"".toRegex().find(json)?.groupValues?.get(1)
+        val geminiThingXd = "\"geminiThingXd\":\\s*\"([^\"]+)\"".toRegex().find(json)?.groupValues?.get(1)
             ?: throw IllegalStateException("Invalid config format")
 
         return UserConfig(

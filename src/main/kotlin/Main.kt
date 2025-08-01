@@ -10,6 +10,7 @@ sealed class Screen {
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() = singleWindowApplication(title = "Cover Letter Generator") {
+    System.setProperty("apple.awt.tsm.ignore", "true")
     var currentScreen by remember { mutableStateOf<Screen>(Screen.CoverLetter) }
     var configLoaded by remember { mutableStateOf(false) }
     var showSplash by remember { mutableStateOf(true) }

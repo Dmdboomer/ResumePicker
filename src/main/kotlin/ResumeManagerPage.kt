@@ -62,6 +62,9 @@ fun ResumeManagerPage(
 
     // Add Resume Dialog
     if (showAddDialog) {
+        var showNameError by remember { mutableStateOf(false) }
+        var showDescriptionError by remember { mutableStateOf(false) }
+
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
             title = { Text("Add Resume") },
@@ -69,28 +72,50 @@ fun ResumeManagerPage(
                 Column {
                     OutlinedTextField(
                         value = newResumeName,
-                        onValueChange = { newResumeName = it },
+                        onValueChange = {
+                            newResumeName = it
+                            showNameError = false // Reset error on type
+                        },
                         label = { Text("Resume Title") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = showNameError,
+                        supportingText = {
+                            if (showNameError) {
+                                Text("Title cannot be empty", color = MaterialTheme.colorScheme.error)
+                            }
+                        }
                     )
                     Spacer(Modifier.height(8.dp))
                     OutlinedTextField(
                         value = newResumeDescription,
-                        onValueChange = { newResumeDescription = it },
+                        onValueChange = {
+                            newResumeDescription = it
+                            showDescriptionError = false // Reset error on type
+                        },
                         label = { Text("Resume Public Information") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = showDescriptionError,
+                        supportingText = {
+                            if (showDescriptionError) {
+                                Text("Description cannot be empty", color = MaterialTheme.colorScheme.error)
+                            }
+                        }
                     )
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        if (newResumeName.isNotBlank()) {
-                            // Fixed: Update both state AND "save" operation
-                            resumes = resumes + newResumeName
-                            // ResumeManager.saveResume(newResumeDescription, newResumeName)
+                        // Validate both fields
+                        val isNameEmpty = newResumeName.isBlank()
+                        val isDescriptionEmpty = newResumeDescription.isBlank()
 
-                            // Reset dialog state
+                        showNameError = isNameEmpty
+                        showDescriptionError = isDescriptionEmpty
+
+                        // Proceed only if both are non-empty
+                        if (!isNameEmpty && !isDescriptionEmpty) {
+                            resumes = resumes + newResumeName
                             newResumeName = ""
                             newResumeDescription = ""
                             showAddDialog = false
