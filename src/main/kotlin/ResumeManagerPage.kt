@@ -16,7 +16,7 @@ fun ResumeManagerPage(
     onBack: () -> Unit,
     onNavigateToConfig: () -> Unit
 ) {
-    var resumes = ResumeManager.getAllNames()
+    var resumes = ResumeManager.getAllNameIds()
     var newResumeName by remember { mutableStateOf("") }
     var newResumeDescription by remember { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -45,13 +45,16 @@ fun ResumeManagerPage(
         HorizontalDivider()
 
         LazyColumn {
-            items(resumes) { resume ->
+            items(resumes) { (id, name) ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(8.dp)
                 ) {
-                    Text(resume, modifier = Modifier.weight(1f))
-                    IconButton(onClick = { resumes = resumes - resume }) {
+                    Text("$id: $name", modifier = Modifier.weight(1f))
+                    IconButton(onClick = {
+                        ResumeManager.deleteResume(id) // Implement this function
+                        resumes = ResumeManager.getAllNameIds()
+                    }) {
                         Icon(Icons.Default.Delete, "Delete")
                     }
                 }
@@ -106,19 +109,18 @@ fun ResumeManagerPage(
             confirmButton = {
                 Button(
                     onClick = {
-                        // Validate both fields
                         val isNameEmpty = newResumeName.isBlank()
                         val isDescriptionEmpty = newResumeDescription.isBlank()
 
                         showNameError = isNameEmpty
                         showDescriptionError = isDescriptionEmpty
 
-                        // Proceed only if both are non-empty
                         if (!isNameEmpty && !isDescriptionEmpty) {
-                            resumes = resumes + newResumeName
+                            ResumeManager.saveResume(newResumeDescription, newResumeName)
                             newResumeName = ""
                             newResumeDescription = ""
                             showAddDialog = false
+                            resumes = ResumeManager.getAllNameIds() // Refresh the list
                         }
                     }
                 ) {

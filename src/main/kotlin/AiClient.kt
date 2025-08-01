@@ -73,7 +73,8 @@ object AiClient {
             Based on this resume: ${publicResumeText.take(5000)},  
             generate a cover letter for this job posting: ${jobPosting.take(3000)}.
             Use placeholders: [name], [phone_number], [email]. Do not use any other placeholders except these 3
-            Start with 'Cover letter:' and use \\n for new lines.
+            I REPEAT, DO NOT USE PLACEHOLDERS EXCEPT FOR NAME, EMAIL, PHONE NUMBER.
+            Start with 'Cover letter:' and use \n for new lines.
             Keep it under 300 words.
         """.trimIndent()
 

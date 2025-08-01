@@ -20,8 +20,8 @@ private fun processResumes() {
     while (true) {
         when (readlnOrNull()) {
             "1" -> ResumeManager.addResume()
-            "2" -> ResumeManager.resumeStats()
-            "3" -> ResumeManager.deleteResume()
+            //"2" -> ResumeManager.resumeStats()
+            //"3" -> ResumeManager.deleteResume()
             "4" -> return
             else -> println("Invalid option")
         }

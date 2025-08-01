@@ -4,8 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 object ResumeManager {
-    private const val MAX_RESUMES = 5
-    private val resumes = mutableListOf<Resume>()
+    private const val MAX_RESUMES = 7
     private val storageDir = File("resumes").apply { mkdir() }
     private val jsonFile = File(storageDir, "resumes.json")
     private val gson = Gson()
@@ -48,6 +47,11 @@ object ResumeManager {
 
     // For non terminal use
     fun saveResume(publicText: String, name: String) {
+        if (countResumes() >= MAX_RESUMES) {
+            println("Max number of resumes reached")
+            return
+        }
+
         val description = AiClient.summarizeResume(publicText)
         val newId = generateNextId()
         val newResume = Resume(newId, name, publicText, description)
@@ -77,35 +81,30 @@ object ResumeManager {
 
     private fun countResumes(): Int = loadResumes().size
 
-    fun resumeStats() {
-        println("Resume stats: Size: " + resumes.size)
-    }
 
-    fun deleteResume() {
+    fun deleteResume(id: Int) {
+        /* //Terminal stuff
         println("Which resume do you want to delete? Enter the ID (0 to cancel)")
         val input = readlnOrNull() ?: return
         if (input == "0") {
             println("Delete cancelled.")
             return
         }
-        try {
-            val id = input.toInt()
-            // Remove from in-memory list
-            resumes.removeIf { it.id == id }
+        */
+        val currentResumes = loadResumes().toMutableList()
+        val initialSize = currentResumes.size
 
-            val dirToDelete = File(storageDir, "resume_$id")
-            if (dirToDelete.exists()) {
-                if (dirToDelete.deleteRecursively()) {
-                    println("Resume $id deleted successfully.")
-                } else {
-                    println("Deleted from records but failed to remove files.")
-                }
-            } else {
-                println("Resume $id not found in storage.")
+        // Remove resumes matching the specified ID
+        currentResumes.removeAll { it.id == id }
+
+        when {
+            currentResumes.size < initialSize -> {
+                saveResumes(currentResumes)
+                println("Resume with ID $id deleted successfully.")
             }
-        } catch (e: NumberFormatException) {
-            println("Invalid input: Please enter a numeric ID.")
+            else -> println("Resume with ID $id not found.")
         }
+
     }
 
 
@@ -117,6 +116,11 @@ object ResumeManager {
     fun getAllNames(): List<String>{
         return loadResumes().map{it.name}
     }
+
+    fun getAllNameIds(): List<Pair<Int, String>>{
+        return loadResumes().map{it.id to it.name}
+    }
+
     fun getPublicText(id: Int): String {
         return loadResumes().firstOrNull { it.id == id }?.publicText ?: ""
     }
